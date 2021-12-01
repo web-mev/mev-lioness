@@ -20,7 +20,7 @@ def slice_matrix(exprs_filename, num_ranges):
     sample_size = len(exprs_df.columns)
     range_list = []
     for i in range(num_ranges):
-        start = i
+        start = i + 1 # convert ranges to 1-based style
         end = 10*(i + 1)
         if i == 10:
             end += sample_size % 10

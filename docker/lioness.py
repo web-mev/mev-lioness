@@ -11,6 +11,10 @@ import sys
 
 def run_lioness(panda_obj, start, end):
     '''Runs LIONESS with PANDA object.'''
+    # start: start - 1 in python
+    # end: end
+    # LIONESS start and end is inclusive
+    # i.e. translated into R 1-based style
     lioness_obj = Lioness(
         panda_obj, 
         save_dir='../data',
