@@ -1,7 +1,7 @@
 # /usr/bin/env python
 
 import argparse
-from netZooPy.panda.panda import panda
+from netZooPy.panda import Panda
 import pandas as pd
 import pickle
 
