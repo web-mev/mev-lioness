@@ -52,7 +52,8 @@ def run_panda(args, panda_output):
         keep_expression_matrix=False
     )
     panda_obj.save_panda_results(panda_output)
-    pickle.dump(panda_obj, "panda_obj.pkl")
+    with open("panda_obj.pkl", "wb") as f:
+        pickle.dump(panda_obj, f)
 
 
 def main():
