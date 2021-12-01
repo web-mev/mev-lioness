@@ -77,4 +77,7 @@ def main():
     # Run PANDA
     slice_matrix(args.exprs)
     run_panda(args, panda_output)
-    
+
+
+if __name__ == "__main__":
+    main()
