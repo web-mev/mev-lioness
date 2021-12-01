@@ -4,16 +4,22 @@ import argparse
 from netZooPy.panda import Panda
 import pandas as pd
 import pickle
+import sys
 
 
-def slice_matrix(exprs_filename):
+def slice_matrix(exprs_filename, num_ranges):
     '''
     Slices matrix into scatter chunks and exports slices to file.
     '''
+    try:
+        num_ranges = int(num_ranges)
+    except ValueError as e:
+        sys.stderr.write("ValueError: %s\n" % str(e))
+        sys.exit()
     exprs_df = pd.read_csv(exprs_filename, index_col = 0, header = 0)
     sample_size = len(exprs_df.columns)
     range_list = []
-    for i in range(10):
+    for i in range(num_ranges):
         start = i
         end = 10*(i + 1)
         if i == 10:
@@ -62,6 +68,10 @@ def main():
         desc="Runs PANDA on input count matrix."
     )
     parser.add_argument(
+        "--ranges", metavar="INT", required=True,
+        help="Number of slice ranges"
+    )
+    parser.add_argument(
         "--motif", metavar="TSV", required=True,
         help="Motif data"
     )
@@ -76,7 +86,7 @@ def main():
     args = parser.parse_args()
     panda_output = "panda_output.mtx"
     # Run PANDA
-    slice_matrix(args.exprs)
+    slice_matrix(args.exprs, args.ranges)
     run_panda(args, panda_output)
 
 
