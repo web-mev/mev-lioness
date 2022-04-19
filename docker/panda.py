@@ -2,6 +2,7 @@
 
 import argparse
 from netZooPy.panda import Panda
+import numpy as np
 import pandas as pd
 import pickle
 import sys
@@ -17,14 +18,16 @@ def slice_matrix(exprs_filename, num_ranges):
         sys.stderr.write("ValueError: %s\n" % str(e))
         sys.exit()
     exprs_df = pd.read_csv(exprs_filename, index_col = 0, header = 0)
-    sample_size = len(exprs_df.columns)
+    sample_size = exprs_df.shape[0]
     range_list = []
-    for i in range(num_ranges):
-        start = i + 1 # convert ranges to 1-based style
-        end = 10*(i + 1)
-        if i == 10:
-            end += sample_size % 10
-        range_list.append((start, end))
+    quantile = int(sample_size / num_ranges)
+    for i in num_ranges:
+        start = quantile * i + 1 # convert ranges to 1-based index
+        end = quantile * (i + 1)
+        if i == num_ranges:
+            end = sample_size + 1 # avoids division remainder issues
+    range_list.append((start, end))
+    # Export ranges to file as TSV
     with open("sample_scatter_ranges.txt", 'w') as handle:
         for start, end in range_list:
             handle.write("%i\t%i\n" % (start, end))
