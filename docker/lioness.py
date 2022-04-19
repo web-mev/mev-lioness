@@ -66,12 +66,11 @@ def main():
         start, end = int(start), int(end)
     except ValueError as e:
         sys.stderr.write("ValueError: %s\n" % str(e))
-        sys.exit()
+        sys.exit(2)
     # Load PANDA object
     panda_obj = load_panda_obj(args.panda)
     # Run LIONESS
     run_lioness(panda_obj, start, end)
-
 
 
 if __name__ == "__main__":
