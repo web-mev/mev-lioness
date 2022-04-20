@@ -27,6 +27,14 @@ workflow mevLioness {
         }
     }
 
+    call mergeLioness {
+        input:
+            lioness_matrix = runLioness.lioness_matrix
+    }
+
+    output {
+        File lioness_target_scores = mergeLioness.lioness_target_scores
+    }
 }
 
 task runPandas {
@@ -73,6 +81,7 @@ task runLioness {
     }
 
     output {
+        File lioness_slice = "lioness_slice.txt"
         File lioness_matrix = "lioness_matrix.npy"
     }
 
@@ -80,6 +89,31 @@ task runLioness {
         docker: "hsphqbrc/mev-netzoopy"
         cpu: 8
         memory: "128 G"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: 0
+    }
+}
+
+task mergeLioness {
+    File lioness_matrix
+
+    Int disk_size = 40
+
+    command {
+        python3 /opt/software/merge_lioness.py \
+            ${lioness_matrix} >> lioness_unrolled.tsv;
+    }
+
+    output {
+        File lioness_gene_target_scores = "lioness.gene_target_scores.tsv"
+        File lioness_tf_target_scores = "lioness.tf_target_scores.tsv"
+        File lioness_unrolled = "lioness.unrolled.tsv"
+    }
+
+    runtime {
+        docker: "hsphqbrc/mev-netzoopy"
+        cpu: 4
+        memory: "16 G"
         disks: "local-disk " + disk_size + " HDD"
         preemptible: 0
     }
