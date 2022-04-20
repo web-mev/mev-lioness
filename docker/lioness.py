@@ -21,8 +21,14 @@ def run_lioness(panda_obj, start, end):
         start = start,
         end = end
     )
-    output_filename = "lioness_matrix.npy"
-    lioness_obj.save_lioness_results(file=output_filename)
+    # Save to binary numpy format
+    out_filename = "lioness_matrix.npy"
+    np.save(
+        out_filename,
+        np.array(lioness_obj.total_lioness_network),
+        allow_pickle=False
+    )
+    return lioness_obj
 
 
 def load_panda_obj(panda_filename):
@@ -67,6 +73,10 @@ def main():
     except ValueError as e:
         sys.stderr.write("ValueError: %s\n" % str(e))
         sys.exit(2)
+    # Print slicing range to file
+    # This is to track sample names
+    with open("lioness_slice.txt", "r") as handle:
+        handle.write("%i\t%i\n" % (start, end))
     # Load PANDA object
     panda_obj = load_panda_obj(args.panda)
     # Run LIONESS
