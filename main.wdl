@@ -29,7 +29,7 @@ workflow mevLioness {
 
     call mergeLioness {
         input:
-            lioness_matrix = runLioness.lioness_matrix
+            lioness_pickle = runLioness.lioness_pickle
     }
 
     output {
@@ -81,8 +81,7 @@ task runLioness {
     }
 
     output {
-        File lioness_slice = "lioness_slice.txt"
-        File lioness_matrix = "lioness_matrix.npy"
+        File lioness_pickle = "lioness_obj.pkl"
     }
 
     runtime {

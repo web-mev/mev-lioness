@@ -22,13 +22,18 @@ def run_lioness(panda_obj, start, end):
         end = end
     )
     # Save to binary numpy format
-    out_filename = "lioness_matrix.npy"
-    np.save(
-        out_filename,
-        np.array(lioness_obj.total_lioness_network),
-        allow_pickle=False
-    )
-    return lioness_obj
+    #out_filename = "lioness_matrix.npy"
+    #np.save(
+    #    out_filename,
+    #    np.array(lioness_obj.total_lioness_network),
+    #    allow_pickle=False
+    #)
+
+    # Save to lioness pickle
+    out_filename = "lioness_obj.pkl"
+    with open(out_filename, "wb") as f:
+        pickle.dump(lioness_obj, f)
+    #return lioness_obj
 
 
 def load_panda_obj(panda_filename):
