@@ -38,7 +38,7 @@ def run_lioness(panda_obj, start, end):
 
 def load_panda_obj(panda_filename):
     '''Loads pickle and returns object.'''
-    with open(panda_filename, 'r') as f:
+    with open(panda_filename, 'rb') as f:
         panda_obj = pickle.load(f)
         return panda_obj
 
