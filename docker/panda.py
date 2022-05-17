@@ -69,8 +69,8 @@ def run_panda(args, panda_output):
     )
     # Save panda output as bi-partite matrix TSV
     df = panda_obj.export_panda_results
-    tfs = df['tf'].drop_duplicates()
-    genes = df['gene'].drop_duplicates()
+    tfs = list(df['tf'].drop_duplicates())
+    genes = list(df['gene'].drop_duplicates())
     arr = np.array(df['force']).reshape(len(genes), len(tfs))
     pd.DataFrame(
         arr,
