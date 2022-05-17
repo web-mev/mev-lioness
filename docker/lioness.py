@@ -9,8 +9,30 @@ import pickle
 import sys
 
 
-def run_lioness(panda_obj, start, end):
-    '''Runs LIONESS with PANDA object.'''
+def get_sample_names(exprs_fname, start, end):
+    """Loads PANDA input expression matrix to extract sample names from TSV.
+
+    Args:
+        exprs_fname (str): PANDA input expression matrix TSV
+        start (int): start index (1-based inclusive)
+        end (end): end index (1-based inclusive)
+
+    Returns:
+        list: strings for sample names
+    """    
+    df = pd.read_csv(exprs_fname, index_col=0, header=0)
+    return list(df.columns[start - 1 : end])
+
+
+def run_lioness(panda_obj, start, end, samplenames):
+    """Runs LIONESS on slice range to output TSV lioness_scatter_output.tsv.
+
+    Args:
+        panda_obj (Panda): PANDA object
+        start (int): start index for slice (1-based inclusive)
+        end (int): end index for slice (1-based inclusive)
+        samplenames (list): list of sample names
+    """    
     # start: start - 1 in python
     # end: end
     # LIONESS start and end is inclusive
@@ -28,23 +50,35 @@ def run_lioness(panda_obj, start, end):
     #    np.array(lioness_obj.total_lioness_network),
     #    allow_pickle=False
     #)
-
-    # Save to lioness pickle
-    out_filename = "lioness_obj.pkl"
-    with open(out_filename, "wb") as f:
-        pickle.dump(lioness_obj, f)
-    #return lioness_obj
+    results = lioness_obj.export_lioness_results
+    results.columns = ["tf", "gene"] + samplenames
+    results.to_csv("lioness_scatter_output.tsv", sep="\t")
 
 
 def load_panda_obj(panda_filename):
-    '''Loads pickle and returns object.'''
+    """Loads PANDA pickle to return PANDA object.
+
+    Args:
+        panda_filename (str): pickle filename
+
+    Returns:
+        Panda: PANDA object
+    """    
     with open(panda_filename, 'rb') as f:
         panda_obj = pickle.load(f)
         return panda_obj
 
 
 def parse_slices(tsv_filename, line_num):
-    '''Parses TSV for line number denoting slice ranges.'''
+    """Parses TSV for specified line to return slice indices.
+
+    Args:
+        tsv_filename (str): TSV file name
+        line_num (int): line number in file to extract
+
+    Returns:
+        list: [start, end] as 1-based inclusive range
+    """    
     slice_ranges = []
     with open(tsv_filename, 'r') as handle:
         for line in handle:
@@ -54,9 +88,11 @@ def parse_slices(tsv_filename, line_num):
 
 
 def main():
+    """Runs LIONESS on input PANDA pickles and given slice range.
+    """    
     # Parse args
     parser = argparse.ArgumentParser(
-        desc="Runs LIONESS on input PANDA pickle"
+        desc="Runs LIONESS on input PANDA pickle and given slice range."
     )
     parser.add_argument(
         "--slices", metavar="TSV", required=True,
@@ -65,6 +101,10 @@ def main():
     parser.add_argument(
         "--line", metavar="INT", required=True,
         help="Line number for slice ranges"
+    )
+    parser.add_argument(
+        "--exprs", metavar="TSV", required=True,
+        help="Input expression matrix to PANDA"
     )
     parser.add_argument(
         "panda", metavar="PICKLE",
@@ -78,10 +118,8 @@ def main():
     except ValueError as e:
         sys.stderr.write("ValueError: %s\n" % str(e))
         sys.exit(2)
-    # Print slicing range to file
-    # This is to track sample names
-    with open("lioness_slice.txt", "r") as handle:
-        handle.write("%i\t%i\n" % (start, end))
+    # Get sample names from slice indices
+    samplenames = get_sample_names(args.exprs)
     # Load PANDA object
     panda_obj = load_panda_obj(args.panda)
     # Run LIONESS
