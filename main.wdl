@@ -4,12 +4,14 @@ workflow mevLioness {
     String scatter_ranges_fname = "sample_scatter_ranges.txt"
 
     # Maximum number of samples allowed in a slice
-    Int max_num_in_slice
+    Int max_num_in_slice = 10
 
     # A fixed motif file
-    File motif_file
+    File? motif_file = "gs://mev-public-data/tissues_motif.tsv"
+
     # A fixed PPI file
-    File ppi_file
+    File? ppi_file = "gs://mev-public-data/tissues_ppi.tsv"
+    
     # A user uploaded exprs count matrix
     File exprs_file
 

@@ -1,0 +1,72 @@
+{
+    "name": "LIONESS (Regulatory Networks)", 
+    "description": "LIONESS uses linear interpolation on perturbed PANDA-derived regulatory networks to infer sample-specific regulatory networks. Further information is available at <a href=\"https://www.cell.com/iscience/fulltext/S2589-0042(19)30087-2\">https://www.cell.com/iscience/fulltext/S2589-0042(19)30087-2</a>", 
+    "inputs": {
+        "mevLioness.exprs_file": {
+            "description": "The input matrix- a gene expression matrix for a cohort of samples.", 
+            "name": "Input matrix:", 
+            "required": true, 
+            "spec": {
+                "attribute_type": "VariableDataResource", 
+                "resource_types": ["MTX","I_MTX", "EXP_MTX", "RNASEQ_COUNT_MTX"], 
+                "many": false
+            }
+        }, 
+        "mevLioness.ppi_file": {
+            "description":"(Optional) A 3-column protein-protein interaction file providing a transcription factor, a gene, and a number between zero and one which represents the strength of evidence for their interaction. We provide a default which is suitable for most cases.",
+            "name":"Protein-protein interactions:",
+            "required": false,
+            "spec": {
+                "attribute_type": "DataResource", 
+                "resource_type": "FT", 
+                "many": false
+            }
+        },
+        "mevLioness.motif_file": {
+            "description":"(Optional) A 3-column file which provides information about transcription factor binding motifs present in the gene. The first column provides the transcription factor, the second provides the gene, and the third column is 0 or 1, depending on whether the TF-binding motif exists (1) or not (0).",
+            "name":"TF motifs:",
+            "required": false,
+            "spec": {
+                "attribute_type": "DataResource", 
+                "resource_type": "FT", 
+                "many": false
+            }
+        }
+    }, 
+    "outputs": {
+        "mevLioness.panda_tsv": {
+            "required": true,
+            "spec": {
+                "attribute_type": "DataResource", 
+                "resource_type": "FT",
+                "many": false
+            }
+        },
+        "mevLioness.lioness_gene_ts_tsv": {
+            "required": true,
+            "spec": {
+                "attribute_type": "DataResource", 
+                "resource_type": "FT",
+                "many": false
+            }
+        },
+        "mevLioness.lioness_tf_ts_tsv": {
+            "required": true,
+            "spec": {
+                "attribute_type": "DataResource", 
+                "resource_type": "FT",
+                "many": false
+            }
+        },
+        "mevLioness.lioness_unrolled_tsv": {
+            "required": true,
+            "spec": {
+                "attribute_type": "DataResource", 
+                "resource_type": "*",
+                "many": false
+            }
+        }
+    }, 
+    "mode": "cromwell",
+    "workspace_operation": true
+}

@@ -1,9 +1,9 @@
-FROM debian:stretch
+FROM debian:bullseye
 
 SHELL ["/bin/bash", "-c"]
 
 RUN apt-get update && \
-    ap-get install -y build-essential \
+    apt-get install -y build-essential \
     wget \
     git \
     python3 \
@@ -17,14 +17,20 @@ ADD lioness.py /opt/software/
 ADD merge_lioness.py /opt/software/
 ADD determine_scatter.py /opt/software/
 
-# Get the miniconda installer script and run it in silent mode:
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /opt/software/miniconda.sh && \
-  bash /opt/software/miniconda.sh -b -p /opt/software/miniconda
-ENV PATH="/opt/software/miniconda/bin:${PATH}"
+# Copy the bucket-based file into this Docker:
+# Note that for the WDL run, these files will be addressed directly.
+# However, failure of this step in the Docker build (e.g. as part of CI tools)
+# will indicate that the files are missing and something is wrong.
+# So this serves as a pre-check.
+RUN wget https://storage.googleapis.com/mev-public-data/tissues_ppi.tsv -O /opt/software/resources/tissues_ppi.tsv
+RUN wget https://storage.googleapis.com/mev-public-data/tissues_motif.tsv -O /opt/software/resources/tissues_motif.tsv
 
 # Install the NetZoo python library
-wget https://github.com/netZoo/netZooPy/archive/refs/tags/0.9.3.tar.gz \
-    -P /opt/software
-tar xzvf /opt/software/0.8.1.tar.gz -C /opt/software
-pip3 install -e /ope/software/netZooPy-0.8.1/
-pip3 install joblib
+RUN wget https://github.com/netZoo/netZooPy/archive/refs/tags/0.9.3.tar.gz \
+    -P /opt/software && \
+    tar xzvf /opt/software/0.9.3.tar.gz -C /opt/software && \
+    pip3 install -e /opt/software/netZooPy-0.9.3/ 
+    
+RUN pip3 install joblib
+
+ENTRYPOINT ["/bin/bash"]
