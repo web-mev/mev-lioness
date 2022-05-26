@@ -34,14 +34,6 @@
         }
     }, 
     "outputs": {
-        "mevLioness.panda_tsv": {
-            "required": true,
-            "spec": {
-                "attribute_type": "DataResource", 
-                "resource_type": "FT",
-                "many": false
-            }
-        },
         "mevLioness.lioness_gene_ts_tsv": {
             "required": true,
             "spec": {
@@ -55,14 +47,6 @@
             "spec": {
                 "attribute_type": "DataResource", 
                 "resource_type": "FT",
-                "many": false
-            }
-        },
-        "mevLioness.lioness_unrolled_tsv": {
-            "required": true,
-            "spec": {
-                "attribute_type": "DataResource", 
-                "resource_type": "*",
                 "many": false
             }
         }
