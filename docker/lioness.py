@@ -97,7 +97,7 @@ def main():
         help="TSV of scatter slices"
     )
     parser.add_argument(
-        "--line", metavar="INT", required=True,
+        "--line", metavar="INT", required=True, type=int,
         help="Line number for slice ranges"
     )
     parser.add_argument(
