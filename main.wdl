@@ -12,11 +12,16 @@ workflow mevLioness {
     # A fixed PPI file
     File? ppi_file = "gs://mev-public-data/tissues_ppi.tsv"
     
+    # A name for the output file containing the target
+    # scores for the genes
+    String gene_ts_output_filename = "lioness_gene_target_scores.tsv"
+
+    # A name for the output file containing the target
+    # scores for the transcription factors
+    String tf_ts_output_filename = "lioness_transcription_factor_target_scores.tsv"
+
     # A user uploaded exprs count matrix
     File exprs_file
-
-    # Output PANDA matrix name
-    String panda_matrix_filename
 
 
     call determineScatters {
@@ -25,21 +30,20 @@ workflow mevLioness {
             max_num_in_slice = max_num_in_slice
     }
 
-    call runPandas {
+    call runPanda {
         input:
             scatter_ranges_fname = scatter_ranges_fname,
-            num_ranges = determineScatters.num_ranges,
+            num_scatters = determineScatters.num_scatters,
             motif_file = motif_file,
             ppi_file = ppi_file,
-            panda_matrix_filename = panda_matrix_filename,
             exprs_file = exprs_file
     }
 
-    scatter (line_num in range(determineScatters.num_ranges)) {
+    scatter (line_num in range(determineScatters.num_scatters)) {
         call runLioness {
             input:
-                panda_pickle = runPandas.panda_pickle,
-                slice_tsv = runPandas.scatter_ranges,
+                panda_pickle = runPanda.panda_pickle,
+                slice_tsv = runPanda.scatter_ranges,
                 line_num = line_num,
                 exprs_file = exprs_file
         }
@@ -47,17 +51,14 @@ workflow mevLioness {
 
     call mergeLioness {
         input:
-            unrolled_output_filename = unrolled_output_filename,
             gene_ts_output_filename = gene_ts_output_filename,
             tf_ts_output_filename = tf_ts_output_filename,
             lioness_scatter_tsv = runLioness.lioness_scatter_tsv
     }
 
     output {
-        File panda_tsv = runPandas.panda_matrix
         File lioness_gene_ts_tsv = mergeLioness.lioness_gene_target_scores
-        File lioness_tf_ts_tsv = merge_lioness.lioness_tf_target_scores
-        File lioness_unrolled_tsv = merge_lioness.lioness_unrolled
+        File lioness_tf_ts_tsv = mergeLioness.lioness_tf_target_scores
     }
 }
 
@@ -68,20 +69,19 @@ task determineScatters {
     command {
         python3 /opt/software/determine_scatter.py \
             --max ${max_num_in_slice} \
-            ${exprs_file}
+            ${exprs_file} > nscatter.txt
     }
 
     output {
-        Int num_ranges = stdout()
+        Int num_scatters = read_int("nscatter.txt")
     }
 }
 
-task runPandas {
+task runPanda {
     String scatter_ranges_fname
-    Int num_ranges
+    Int num_scatters
     File motif_file
     File ppi_file
-    String panda_matrix_filename
     File exprs_file
 
     Int disk_size = 40
@@ -89,21 +89,19 @@ task runPandas {
     command {
         python3 /opt/software/panda.py \
             --scatter ${scatter_ranges_fname} \
-            --ranges ${num_ranges} \
+            --num_scatters ${num_scatters} \
             --motif ${motif_file} \
             --ppi ${ppi_file} \
-            --out ${panda_matrix_filename} \
             ${exprs_file}
     }
 
     output {
         File panda_pickle = "panda_obj.pkl"
-        File panda_matrix = "${panda_matrix_filename}"
         File scatter_ranges = "${scatter_ranges_fname}"
     }
 
     runtime {
-        docker: "hsphqbrc/mev-netzoopy"
+        docker: "ghcr.io/web-mev/mev-lioness"
         cpu: 8
         memory: "128 G"
         disks: "local-disk " + disk_size + " HDD"
@@ -113,25 +111,33 @@ task runPandas {
 
 task runLioness {
     File panda_pickle
+    File exprs_file
     File slice_tsv
     Int line_num
     
+    String output_fname = "lioness_scatter_output.tsv"
+    String tmp_dir = "/tmp_data"
     Int disk_size = 40
 
     command {
+
+        mkdir ${tmp_dir}
+
         python3 /opt/software/lioness.py \
             --slices ${slice_tsv} \
             --line ${line_num} \
             --exprs ${exprs_file} \
+            --output ${output_fname} \
+            --save_dir ${tmp_dir} \
             ${panda_pickle}
     }
 
     output {
-        File lioness_scatter_tsv = "lioness_scatter_output.tsv"
+        File lioness_scatter_tsv = "${output_fname}"
     }
 
     runtime {
-        docker: "hsphqbrc/mev-netzoopy"
+        docker: "ghcr.io/web-mev/mev-lioness"
         cpu: 8
         memory: "128 G"
         disks: "local-disk " + disk_size + " HDD"
@@ -140,7 +146,6 @@ task runLioness {
 }
 
 task mergeLioness {
-    String unrolled_output_filename
     String gene_ts_output_filename
     String tf_ts_output_filename
     Array[File] lioness_scatter_tsv
@@ -149,7 +154,6 @@ task mergeLioness {
 
     command {
         python3 /opt/software/merge_lioness.py \
-            --full ${unrolled_output_filename} \
             --gene ${gene_ts_output_filename} \
             --tf ${tf_ts_output_filename} \
             --lioness ${sep=" " lioness_scatter_tsv};
@@ -158,11 +162,10 @@ task mergeLioness {
     output {
         File lioness_gene_target_scores = "${gene_ts_output_filename}"
         File lioness_tf_target_scores = "${tf_ts_output_filename}"
-        File lioness_unrolled = "${unrolled_output_filename}"
     }
 
     runtime {
-        docker: "hsphqbrc/mev-netzoopy"
+        docker: "ghcr.io/web-mev/mev-lioness"
         cpu: 4
         memory: "16 G"
         disks: "local-disk " + disk_size + " HDD"

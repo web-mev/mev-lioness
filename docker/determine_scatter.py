@@ -2,6 +2,7 @@
 
 import argparse
 import pandas as pd
+import sys
 
 def get_num_samples(fname):
     """Parses TSV for number of columns
@@ -12,17 +13,21 @@ def get_num_samples(fname):
     Returns:
         int: number of columns in TSV
     """    
-    df = pd.read_csv(fname, index_col=0, header=0, sep="\t")
-    samples = df.columns.values.tolist()
-    return len(samples)
+    df = pd.read_table(fname, index_col=0, header=0, sep="\t")
+    return df.shape[1]
 
 
 def determine_num_ranges(N, max_n):
-    """Calculates the number of ranges given max_n from N.
+    """Calculates the number of scatters given max_n from N.
+
+    To increase the speed of the LIONESS analysis, we use split the expression
+    matrix and operate on smaller subsets (e.g. like a map-reduce).
+    To limit the number of samples in a given shard, we specify `max_n`.
+    Given that `max_n`, we get the number of shards we will need to make
 
     Args:
         N (int): total N of samples / observations
-        max_n (int): max n for a single range
+        max_n (int): maximum number of samples for a single shard
 
     Returns:
         int: total number of windows
@@ -37,7 +42,7 @@ def main():
         description="Determines the number of WDL scatters from TSV."
     )
     parser.add_argument(
-        "-m", "--max", metavar="INT", default="50",
+        "-m", "--max", metavar="INT", default=50, type=int,
         help="max number of samples per scatter [default: 50]"
     )
     parser.add_argument(

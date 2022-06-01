@@ -1,12 +1,7 @@
-# /usr/bin/env python
-
 import argparse
-from netZooPy.panda import Panda
 from netZooPy.lioness import Lioness
-from netZooPy.lioness.analyze_lioness import AnalyzeLioness
 import pandas as pd
 import pickle
-import sys
 
 
 def get_sample_names(exprs_fname, start, end):
@@ -20,11 +15,18 @@ def get_sample_names(exprs_fname, start, end):
     Returns:
         list: strings for sample names
     """    
-    df = pd.read_csv(exprs_fname, index_col=0, header=0)
+    df = pd.read_table(exprs_fname, index_col=0, header=0, sep='\t')
+    # note that the start and end are 1-based, so start-1:end picks up
+    # the correct indices in python's 0-based indexing.
     return list(df.columns[start - 1 : end])
 
 
-def run_lioness(panda_obj, start, end, samplenames):
+def run_lioness(panda_obj, 
+    start, 
+    end, 
+    samplenames, 
+    output_filename,
+    save_dir):
     """Runs LIONESS on slice range to output TSV lioness_scatter_output.tsv.
 
     Args:
@@ -32,6 +34,7 @@ def run_lioness(panda_obj, start, end, samplenames):
         start (int): start index for slice (1-based inclusive)
         end (int): end index for slice (1-based inclusive)
         samplenames (list): list of sample names
+        output_filename (str): name of the output file.
     """    
     # start: start - 1 in python
     # end: end
@@ -39,20 +42,14 @@ def run_lioness(panda_obj, start, end, samplenames):
     # i.e. translated into R 1-based style
     lioness_obj = Lioness(
         panda_obj, 
-        save_dir='../data',
+        save_dir=save_dir,
         start = start,
         end = end
     )
-    # Save to binary numpy format
-    #out_filename = "lioness_matrix.npy"
-    #np.save(
-    #    out_filename,
-    #    np.array(lioness_obj.total_lioness_network),
-    #    allow_pickle=False
-    #)
+
     results = lioness_obj.export_lioness_results
     results.columns = ["tf", "gene"] + samplenames
-    results.to_csv("lioness_scatter_output.tsv", sep="\t")
+    results.to_csv(output_filename, sep="\t")
 
 
 def load_panda_obj(panda_filename):
@@ -79,12 +76,13 @@ def parse_slices(tsv_filename, line_num):
     Returns:
         list: [start, end] as 1-based inclusive range
     """    
-    slice_ranges = []
-    with open(tsv_filename, 'r') as handle:
-        for line in handle:
-            arow = line.strip('\n').split('\t')
-            slice_ranges.append(arow)
-    return slice_ranges[line_num]
+    slice_ranges_df = pd.read_table(
+        tsv_filename,
+        sep='\t',
+        header=None,
+        names = ['start', 'end']
+    )
+    return slice_ranges_df.iloc[line_num]
 
 
 def main():
@@ -92,7 +90,7 @@ def main():
     """    
     # Parse args
     parser = argparse.ArgumentParser(
-        desc="Runs LIONESS on input PANDA pickle and given slice range."
+        description="Runs LIONESS on input PANDA pickle and given slice range."
     )
     parser.add_argument(
         "--slices", metavar="TSV", required=True,
@@ -107,23 +105,39 @@ def main():
         help="Input expression matrix to PANDA"
     )
     parser.add_argument(
+        "--output", metavar="TSV", required=True,
+        help="Output filename"
+    )
+    parser.add_argument(
+        "--save_dir", metavar="DIR", required=True,
+        help="Directory to save intermediate calcs"
+    )
+    parser.add_argument(
         "panda", metavar="PICKLE",
         help="PANDA pickle object"
     )
     args = parser.parse_args()
-    # Load slicing ranges
+    
+    # Load slicing ranges and get the start and end
+    # locations for the slice. Note that the numbers
+    # are inclusive (e.g. if the end of the range is 
+    # 10, then we include that, unlike the range func)
     start, end = parse_slices(args.slices, args.line)
-    try:
-        start, end = int(start), int(end)
-    except ValueError as e:
-        sys.stderr.write("ValueError: %s\n" % str(e))
-        sys.exit(2)
+    
     # Get sample names from slice indices
     samplenames = get_sample_names(args.exprs)
+
     # Load PANDA object
     panda_obj = load_panda_obj(args.panda)
+
     # Run LIONESS
-    run_lioness(panda_obj, start, end)
+    run_lioness(panda_obj, 
+        start, 
+        end, 
+        samplenames,
+        args.output, 
+        args.save_dir    
+    )
 
 
 if __name__ == "__main__":

@@ -5,50 +5,44 @@ import pandas as pd
 import sys
 
 
-def merge_lioness_scatter(input_files, full, genes, tfs):
+def merge_lioness_scatter(input_files, full, genes_output, tfs_output):
     """Merges lioness slices into complete matrix and exports to file.
 
     Args:
         input_files (list): list of input file names
         full (str): file name for unrolled matrix
-        genes (str): file name for gene target score matrix
-        tfs (str): file name for tf target score matrix
+        genes_output (str): file name for gene target score matrix
+        tfs_output (str): file name for tf target score matrix
     """    
-    df = pd.read_csv(input_files[0], sep="\t", index_col=0)
+    # this uses a multiIndex which combines the first two columns
+    # containing the transcription factor and gene
+    df = pd.read_table(input_files[0], sep="\t", index_col=[0,1])
     for fname in input_files[1:]:
-        other = pd.read_csv(fname, sep="\t", index_col=0)
-        df = df.join(other.iloc[:, 2:])
-    # Drop gene and tf columns, set index to a combine unique gene<->tf index
-    # export to TSV
-    df.iloc[:, 2:].set_index(
-        df['gene'] + "<->" + df['tf']
-    ).to_csv(full, sep="\t")
-    num_genes = len(df['gene'].drop_duplicates())
-    num_tfs = len(df['tf'].drop_duplicates())
-    num_samples = len(df.columns[2:])
-    arr = np.array(df.iloc[:, 2:]).reshape(num_genes, num_tfs, num_samples)
-    # Sum by gene all tfs, export to file
-    pd.DataFrame(
-        arr.sum(axis=1),
-        index=list(df['gene'].drop_duplicates()),
-        columns=df.columns[2:]
-    ).to_csv(genes, sep="\t")
-    pd.DataFrame(
-        arr.sum(axis=0),
-        index=list(df['tf'].drop_duplicates()),
-        columns=df.columns[2:]
-    ).to_csv(tfs, sep="\t")
+        other = pd.read_table(fname, sep="\t", index_col=[0,1])
+        df = df.join(other, how='inner')
+
+    # For each gene, sum across the transcription factors on a 
+    # per sample basis to get the targeting score of that gene
+    # for that sample:
+    df.groupby(level='gene').sum().to_csv(
+        genes_output,
+        sep='\t'
+    )
+
+    # For each TF, sum across the genes on a per sample
+    # basis to get the targeting score of that TF
+    # for that sample:
+    df.groupby(level='tf').sum().to_csv(
+        tfs_output,
+        sep='\t'
+    )
 
 
 def main():
     '''Merges scattered LIONESS matrices into a single target score matrix.'''
     # Parse args
     parser = argparse.ArgumentParser(
-        desc="Merges LIONESS matrices into a single target score matrix."
-    )
-    parser.add_argument(
-        "--full", metavar="TSV",required=True, 
-        help="Output file name for unrolled matrix"
+        description="Merges LIONESS matrices into a single target score matrix."
     )
     parser.add_argument(
         "--gene", metavar="TSV", required=True,
