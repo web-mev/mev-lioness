@@ -65,7 +65,9 @@ workflow mevLioness {
 task determineScatters {
     File exprs_file
     Int max_num_in_slice
-    
+
+    Int disk_size = 40
+
     command {
         python3 /opt/software/determine_scatter.py \
             --max ${max_num_in_slice} \
@@ -74,6 +76,14 @@ task determineScatters {
 
     output {
         Int num_scatters = read_int("nscatter.txt")
+    }
+
+    runtime {
+        docker: "ghcr.io/web-mev/mev-lioness"
+        cpu: 2
+        memory: "8 G"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: 0
     }
 }
 
