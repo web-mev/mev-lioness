@@ -125,7 +125,7 @@ def main():
     start, end = parse_slices(args.slices, args.line)
     
     # Get sample names from slice indices
-    samplenames = get_sample_names(args.exprs)
+    samplenames = get_sample_names(args.exprs, start, end)
 
     # Load PANDA object
     panda_obj = load_panda_obj(args.panda)
