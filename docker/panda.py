@@ -45,12 +45,11 @@ def slice_matrix(exprs_filename, output_filename, num_scatters):
             handle.write("%i\t%i\n" % (start, end))
 
 
-def run_panda(args, panda_output):
+def run_panda(args):
     """Run PANDA and saves as pickle.
 
     Args:
         args (argparse.ArgumentParser()): passed args from main()
-        panda_output (str): output file name for PANDA TSV
     """    
     # Load the data as a pandas dataframes
     # Required for LIONESS
@@ -128,7 +127,7 @@ def main():
     )
     args = parser.parse_args()
     slice_matrix(args.exprs, args.scatter, args.num_scatters)
-    run_panda(args, args.out)
+    run_panda(args)
 
 
 if __name__ == "__main__":
