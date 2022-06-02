@@ -32,7 +32,13 @@ def determine_num_ranges(N, max_n):
     Returns:
         int: total number of windows
     """    
-    return int(N / max_n)
+    d = int(N / max_n)
+
+    # edge case where max_n > N.
+    # We need at least one shard 
+    if d == 0:
+        return 1
+    return d
 
 
 def main():
