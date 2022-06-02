@@ -5,12 +5,11 @@ import pandas as pd
 import sys
 
 
-def merge_lioness_scatter(input_files, full, genes_output, tfs_output):
+def merge_lioness_scatter(input_files, genes_output, tfs_output):
     """Merges lioness slices into complete matrix and exports to file.
 
     Args:
         input_files (list): list of input file names
-        full (str): file name for unrolled matrix
         genes_output (str): file name for gene target score matrix
         tfs_output (str): file name for tf target score matrix
     """    
@@ -57,9 +56,7 @@ def main():
         help="unrolled LIONESS TSV(s)"
     )
     args = parser.parse_args()
-    merge_lioness_scatter(
-        args.lioness, args.full, args.gene, args.tf
-    )
+    merge_lioness_scatter(args.lioness, args.gene, args.tf)
 
 
 if __name__ == "__main__":
