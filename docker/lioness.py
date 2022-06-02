@@ -49,7 +49,7 @@ def run_lioness(panda_obj,
 
     results = lioness_obj.export_lioness_results
     results.columns = ["tf", "gene"] + samplenames
-    results.to_csv(output_filename, sep="\t")
+    results.to_csv(output_filename, sep="\t", index=False)
 
 
 def load_panda_obj(panda_filename):

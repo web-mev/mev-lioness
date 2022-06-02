@@ -16,24 +16,31 @@ def merge_lioness_scatter(input_files, genes_output, tfs_output):
     # this uses a multiIndex which combines the first two columns
     # containing the transcription factor and gene
     df = pd.read_table(input_files[0], sep="\t", index_col=[0,1])
+
+    # perform the target score sums on both gene and tf.
+    # This splits the `df` dataframe so that the joins below
+    # are far smaller.
+    gene_df = df.groupby(level='gene').sum()
+    tf_df = df.groupby(level='tf').sum()
     for fname in input_files[1:]:
+        # read and perform the target score summations ahead of time
         other = pd.read_table(fname, sep="\t", index_col=[0,1])
-        df = df.join(other, how='inner')
+        other_gene_df = other.groupby(level='gene').sum()
+        other_tf_df = other.groupby(level='tf').sum()
 
-    # For each gene, sum across the transcription factors on a 
-    # per sample basis to get the targeting score of that gene
-    # for that sample:
-    df.groupby(level='gene').sum().to_csv(
+        # now merge into the 'master' dataframes 
+        gene_df = gene_df.join(other_gene_df)
+        tf_df = tf_df.join(other_tf_df)
+
+    gene_df.to_csv(
         genes_output,
-        sep='\t'
+        sep='\t',
+        float_format='%.3f'
     )
-
-    # For each TF, sum across the genes on a per sample
-    # basis to get the targeting score of that TF
-    # for that sample:
-    df.groupby(level='tf').sum().to_csv(
+    tf_df.to_csv(
         tfs_output,
-        sep='\t'
+        sep='\t',
+        float_format='%.3f'
     )
 
 
