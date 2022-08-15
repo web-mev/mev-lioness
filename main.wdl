@@ -160,7 +160,7 @@ task mergeLioness {
     String tf_ts_output_filename
     Array[File] lioness_scatter_tsv
 
-    Int disk_size = 40
+    Int disk_size = 200
 
     command {
         python3 /opt/software/merge_lioness.py \
