@@ -9,7 +9,9 @@ import sys
 
 # Max number of genes to consider. We take the top N 
 # based on their mean expression across all samples
-NMAX = 15000
+# Note that this was made quite large, so it will
+# cover any reasonably sized transcriptome.
+NMAX = 1500000
 
 def slice_matrix(exprs_filename, output_filename, num_scatters):
     """Slices samples into bins for LIONESS scatter.
