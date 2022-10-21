@@ -32,5 +32,3 @@ RUN wget https://github.com/netZoo/netZooPy/archive/refs/tags/0.9.3.tar.gz \
     pip3 install -e /opt/software/netZooPy-0.9.3/ 
     
 RUN pip3 install joblib
-
-ENTRYPOINT ["/bin/bash"]

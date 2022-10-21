@@ -83,7 +83,6 @@ task determineScatters {
         cpu: 2
         memory: "8 G"
         disks: "local-disk " + disk_size + " HDD"
-        preemptible: 0
     }
 }
 
@@ -115,7 +114,6 @@ task runPanda {
         cpu: 8
         memory: "128 G"
         disks: "local-disk " + disk_size + " HDD"
-        preemptible: 0
     }
 }
 
@@ -151,7 +149,6 @@ task runLioness {
         cpu: 8
         memory: "128 G"
         disks: "local-disk " + disk_size + " HDD"
-        preemptible: 0
     }
 }
 
@@ -179,6 +176,5 @@ task mergeLioness {
         cpu: 4
         memory: "16 G"
         disks: "local-disk " + disk_size + " HDD"
-        preemptible: 0
     }
 }
