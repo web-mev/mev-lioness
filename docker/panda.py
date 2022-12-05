@@ -11,7 +11,7 @@ import sys
 # based on their mean expression across all samples
 # Note that this was made quite large, so it will
 # cover any reasonably sized transcriptome.
-NMAX = 1500000
+NMAX = 25000
 
 def slice_matrix(exprs_filename, output_filename, num_scatters):
     """Slices samples into bins for LIONESS scatter.
