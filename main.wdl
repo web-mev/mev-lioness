@@ -7,10 +7,10 @@ workflow mevLioness {
     Int max_num_in_slice = 10
 
     # A fixed motif file
-    File? motif_file = "gs://mev-public-data/tissues_motif.tsv"
+    File? motif_file = "s3://webmev-public/tissues_motif.tsv"
 
     # A fixed PPI file
-    File? ppi_file = "gs://mev-public-data/tissues_ppi.tsv"
+    File? ppi_file = "s3://webmev-public/tissues_ppi.tsv"
     
     # A name for the output file containing the target
     # scores for the genes
