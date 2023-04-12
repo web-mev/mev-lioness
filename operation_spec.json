@@ -1,6 +1,6 @@
 {
     "name": "LIONESS (Regulatory Networks)", 
-    "description": "LIONESS uses linear interpolation on perturbed PANDA-derived regulatory networks to infer sample-specific regulatory networks. Further information is available at <a href=\"https://www.cell.com/iscience/fulltext/S2589-0042(19)30087-2\">https://www.cell.com/iscience/fulltext/S2589-0042(19)30087-2</a>", 
+    "description": "LIONESS uses linear interpolation on perturbed PANDA-derived regulatory networks to infer sample-specific regulatory networks. Further information is available at <a href=\"https://www.cell.com/iscience/fulltext/S2589-0042(19)30087-2\">https://www.cell.com/iscience/fulltext/S2589-0042(19)30087-2</a>.<br/>Note that if you want to use this tool for non-human data, you will need to first map to orthologous human genes due to LIONESS's dependence on human-derived TF motif and protein-protein interaction data.", 
     "inputs": {
         "mevLioness.exprs_file": {
             "description": "The input matrix- a gene expression matrix for a cohort of samples.", 
@@ -13,26 +13,14 @@
                 "many": false
             }
         }, 
-        "mevLioness.ppi_file": {
-            "description":"(Optional) A 3-column protein-protein interaction file providing a transcription factor, a gene, and a number between zero and one which represents the strength of evidence for their interaction. We provide a default which is suitable for most cases.",
-            "name":"Protein-protein interactions:",
-            "required": false,
-            "converter": "api.converters.data_resource.CromwellSingleDataResourceConverter",
+        "mevLioness.identifier_choice": {
+            "description":"Which gene identifiers are used in your expression matrix? Symbols correspond with common gene names while Ensembl identifiers start with ENSG.",
+            "name":"Gene identifier:",
+            "required": true,
+            "converter": "api.converters.basic_attributes.StringConverter",
             "spec": {
-                "attribute_type": "DataResource", 
-                "resource_type": "FT", 
-                "many": false
-            }
-        },
-        "mevLioness.motif_file": {
-            "description":"(Optional) A 3-column file which provides information about transcription factor binding motifs present in the gene. The first column provides the transcription factor, the second provides the gene, and the third column is 0 or 1, depending on whether the TF-binding motif exists (1) or not (0).",
-            "name":"TF motifs:",
-            "required": false,
-            "converter": "api.converters.data_resource.CromwellSingleDataResourceConverter",
-            "spec": {
-                "attribute_type": "DataResource", 
-                "resource_type": "FT", 
-                "many": false
+                "attribute_type": "OptionString", 
+                "options": ["Symbol", "Ensembl"]
             }
         }
     }, 

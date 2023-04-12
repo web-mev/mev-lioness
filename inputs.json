@@ -1,5 +1,4 @@
 {
     "mevLioness.exprs_file": "File", 
-    "mevLioness.ppi_file": "File",
-    "mevLioness.motif_file": "File"
+    "mevLioness.identifier_choice": "String"
 }

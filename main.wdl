@@ -6,11 +6,20 @@ workflow mevLioness {
     # Maximum number of samples allowed in a slice
     Int max_num_in_slice = 10
 
-    # A fixed motif file
-    File? motif_file = "s3://webmev-public/tissues_motif.tsv"
+    # which gene identifiers are used in the expression matrix
+    String identifier_choice
 
-    # A fixed PPI file
-    File? ppi_file = "s3://webmev-public/tissues_ppi.tsv"
+    Map[String, File] motifMap = {
+        "Symbol":"s3://webmev-public/tissues_motif.symbol.tsv",
+        "Ensembl":"s3://webmev-public/tissues_motif.ensg.tsv"
+    }
+    
+    # Choose the motif file based on the gene identifier
+    File motif_file = motifMap[identifier_choice]
+
+    # A PPI file. Since the matrix from this file does not multiply
+    # with the expression matrix, we do not need an "identifier-specific" version
+    File ppi_file = "s3://webmev-public/tissues_ppi.tsv"
     
     # A name for the output file containing the target
     # scores for the genes
