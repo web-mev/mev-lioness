@@ -1,34 +1,22 @@
-FROM debian:bullseye
+FROM mambaorg/micromamba
 
-SHELL ["/bin/bash", "-c"]
+# for building the conda env
+COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yml /tmp/environment.yml
+# Build the environment based on the yml file
+RUN micromamba install -y -n base -f /tmp/environment.yml \
+  && micromamba clean --all --yes
 
-RUN apt-get update && \
-    apt-get install -y build-essential \
-    wget \
-    git \
-    python3 \
-    python3-pip
-
-# Install all software under /opt/software:
-RUN mkdir -p /opt/software 
-RUN mkdir -p /opt/software/resources
-ADD panda.py /opt/software/ 
-ADD lioness.py /opt/software/
-ADD merge_lioness.py /opt/software/
-ADD determine_scatter.py /opt/software/
-
-# Copy the bucket-based file into this Docker:
 # Note that for the WDL run, these files will be addressed directly.
 # However, failure of this step in the Docker build (e.g. as part of CI tools)
 # will indicate that the files are missing and something is wrong.
-# So this serves as a pre-check.
-RUN wget https://storage.googleapis.com/mev-public-data/tissues_ppi.tsv -O /opt/software/resources/tissues_ppi.tsv
-RUN wget https://storage.googleapis.com/mev-public-data/tissues_motif.tsv -O /opt/software/resources/tissues_motif.tsv
+# So this serves as a double-check.
+USER $MAMBA_USER
+ARG MAMBA_DOCKERFILE_ACTIVATE=1
+RUN curl --silent --output /dev/null https://webmev-public.s3.us-east-2.amazonaws.com/tissues_motif.ensg.tsv
+RUN curl --silent --output /dev/null https://webmev-public.s3.us-east-2.amazonaws.com/tissues_motif.symbol.tsv
+RUN curl --silent --output /dev/null https://webmev-public.s3.us-east-2.amazonaws.com/tissues_ppi.tsv
 
-# Install the NetZoo python library
-RUN wget https://github.com/netZoo/netZooPy/archive/refs/tags/0.9.3.tar.gz \
-    -P /opt/software && \
-    tar xzvf /opt/software/0.9.3.tar.gz -C /opt/software && \
-    pip3 install -e /opt/software/netZooPy-0.9.3/ 
-    
-RUN pip3 install joblib
+ADD panda.py /usr/local/bin/
+ADD lioness.py /usr/local/bin/
+ADD merge_lioness.py /usr/local/bin/
+ADD determine_scatter.py /usr/local/bin/

@@ -1,0 +1,8 @@
+name: base
+channels:
+  - conda-forge
+  - netzoo
+  - defaults
+dependencies:
+  - curl=8.5.0
+  - netzoopy=0.10.0

@@ -78,7 +78,7 @@ task determineScatters {
     Int disk_size = 40
 
     command {
-        python3 /opt/software/determine_scatter.py \
+        python3 /usr/local/bin/determine_scatter.py \
             --max ${max_num_in_slice} \
             ${exprs_file} > nscatter.txt
     }
@@ -105,7 +105,7 @@ task runPanda {
     Int disk_size = 40
 
     command {
-        python3 /opt/software/panda.py \
+        python3 /usr/local/bin/panda.py \
             --scatter ${scatter_ranges_fname} \
             --num_scatters ${num_scatters} \
             --motif ${motif_file} \
@@ -140,7 +140,7 @@ task runLioness {
 
         mkdir ${tmp_dir}
 
-        python3 /opt/software/lioness.py \
+        python3 /usr/local/bin/lioness.py \
             --slices ${slice_tsv} \
             --line ${line_num} \
             --exprs ${exprs_file} \
@@ -169,7 +169,7 @@ task mergeLioness {
     Int disk_size = 200
 
     command {
-        python3 /opt/software/merge_lioness.py \
+        python3 /usr/local/bin/merge_lioness.py \
             --gene ${gene_ts_output_filename} \
             --tf ${tf_ts_output_filename} \
             --lioness ${sep=" " lioness_scatter_tsv};
