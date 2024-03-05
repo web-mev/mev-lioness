@@ -41,10 +41,11 @@ def slice_matrix(exprs_filename, output_filename, num_scatters):
             end = sample_size # avoids division remainder issues
         range_list.append((start, end))
 
-    # Export ranges to file as TSV
+    # Export ranges to file as CSV
     with open(output_filename, 'w') as handle:
+        handle.write("start,end\n")
         for start, end in range_list:
-            handle.write("%i\t%i\n" % (start, end))
+            handle.write("%i,%i\n" % (start, end))
 
 
 def run_panda(args):

@@ -66,25 +66,6 @@ def load_panda_obj(panda_filename):
         return panda_obj
 
 
-def parse_slices(tsv_filename, line_num):
-    """Parses TSV for specified line to return slice indices.
-
-    Args:
-        tsv_filename (str): TSV file name
-        line_num (int): line number in file to extract
-
-    Returns:
-        list: [start, end] as 1-based inclusive range
-    """    
-    slice_ranges_df = pd.read_table(
-        tsv_filename,
-        sep='\t',
-        header=None,
-        names = ['start', 'end']
-    )
-    return slice_ranges_df.iloc[line_num]
-
-
 def main():
     """Runs LIONESS on input PANDA pickles and given slice range.
     """    
@@ -93,12 +74,12 @@ def main():
         description="Runs LIONESS on input PANDA pickle and given slice range."
     )
     parser.add_argument(
-        "--slices", metavar="TSV", required=True,
-        help="TSV of scatter slices"
+        "--start", required=True, type=int
+        help="Start index for slice"
     )
     parser.add_argument(
-        "--line", metavar="INT", required=True, type=int,
-        help="Line number for slice ranges"
+        "--end", required=True, type=int,
+        help="End for slice"
     )
     parser.add_argument(
         "--exprs", metavar="TSV", required=True,
@@ -118,22 +99,16 @@ def main():
     )
     args = parser.parse_args()
     
-    # Load slicing ranges and get the start and end
-    # locations for the slice. Note that the numbers
-    # are inclusive (e.g. if the end of the range is 
-    # 10, then we include that, unlike the range func)
-    start, end = parse_slices(args.slices, args.line)
-    
     # Get sample names from slice indices
-    samplenames = get_sample_names(args.exprs, start, end)
+    samplenames = get_sample_names(args.exprs, args.start, args.end)
 
     # Load PANDA object
     panda_obj = load_panda_obj(args.panda)
 
     # Run LIONESS
     run_lioness(panda_obj, 
-        start, 
-        end, 
+        args.start, 
+        args.end, 
         samplenames,
         args.output, 
         args.save_dir    

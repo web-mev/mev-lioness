@@ -1,4 +1,4 @@
 {
-    "mevLioness.exprs_file": "File", 
-    "mevLioness.identifier_choice": "String"
+    "exprs_file": "File", 
+    "identifier_choice": "String"
 }

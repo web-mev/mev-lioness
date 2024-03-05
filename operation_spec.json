@@ -2,18 +2,18 @@
     "name": "LIONESS (Regulatory Networks)", 
     "description": "LIONESS uses linear interpolation on perturbed PANDA-derived regulatory networks to infer sample-specific regulatory networks. Further information is available at <a href=\"https://www.cell.com/iscience/fulltext/S2589-0042(19)30087-2\">https://www.cell.com/iscience/fulltext/S2589-0042(19)30087-2</a>.<br/>Note that if you want to use this tool for non-human data, you will need to first map to orthologous human genes due to LIONESS's dependence on human-derived TF motif and protein-protein interaction data.", 
     "inputs": {
-        "mevLioness.exprs_file": {
+        "exprs_file": {
             "description": "The input matrix- a gene expression matrix for a cohort of samples.", 
             "name": "Input matrix:", 
             "required": true, 
-            "converter": "api.converters.data_resource.CromwellSingleVariableDataResourceConverter",
+            "converter": "api.converters.data_resource.RemoteNextflowSingleVariableDataResourceConverter",
             "spec": {
                 "attribute_type": "VariableDataResource", 
                 "resource_types": ["MTX","I_MTX", "EXP_MTX", "RNASEQ_COUNT_MTX"], 
                 "many": false
             }
         }, 
-        "mevLioness.identifier_choice": {
+        "identifier_choice": {
             "description":"Which gene identifiers are used in your expression matrix? Symbols correspond with common gene names while Ensembl identifiers start with ENSG.",
             "name":"Gene identifier:",
             "required": true,
@@ -27,7 +27,7 @@
     "outputs": {
         "mevLioness.lioness_gene_ts_tsv": {
             "required": true,
-            "converter": "api.converters.data_resource.CromwellSingleDataResourceConverter",
+            "converter": "api.converters.data_resource.RemoteNextflowSingleDataResourceConverter",
             "spec": {
                 "attribute_type": "DataResource", 
                 "resource_type": "FT",
@@ -36,7 +36,7 @@
         },
         "mevLioness.lioness_tf_ts_tsv": {
             "required": true,
-            "converter": "api.converters.data_resource.CromwellSingleDataResourceConverter",
+            "converter": "api.converters.data_resource.RemoteNextflowSingleDataResourceConverter",
             "spec": {
                 "attribute_type": "DataResource", 
                 "resource_type": "FT",
@@ -44,6 +44,6 @@
             }
         }
     }, 
-    "mode": "cromwell",
+    "mode": "nf_batch",
     "workspace_operation": true
 }
