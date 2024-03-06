@@ -62,10 +62,12 @@ process run_panda {
     tag "Run panda"
     container "ghcr.io/web-mev/mev-lioness"
     cpus 8
-    memory 120 GB
+    memory '120 GB'
 
     input:
         path exprs_file
+        path motif_file
+        path ppi_file
         val num_scatters
 
     output:
@@ -73,8 +75,6 @@ process run_panda {
         path "${scatter_ranges_fname}"
 
     script:
-        ppi_file = params.ppi_file
-        motif_file = params.motif_files_map["${params.identifier_choice}"]
         panda_pkl = "panda_obj.pkl"
         scatter_ranges_fname = "sample_scatter_ranges.csv"
         """
@@ -93,7 +93,7 @@ process merge_lioness_shards {
     publishDir "${params.output_dir}/mevLioness.lioness_tf_ts_tsv", mode:"copy", pattern:"${tf_ts_output_filename}"
     container "ghcr.io/web-mev/mev-lioness"
     cpus 4
-    memory 16 GB
+    memory '16 GB'
 
     input:
         path 'shards'
@@ -115,8 +115,11 @@ process merge_lioness_shards {
 
 workflow {
 
+    ppi_file_ch = Channel.fromPath(params.ppi_file)
+    motif_file_ch = Channel.fromPath(params.motif_files_map[params.identifier_choice.toLowerCase()])
+
     num_scatter_ch = determine_scatters(params.exprs_file, params.max_num_in_slice)
-    (pkl_ch, scatter_range_ch) = run_panda(params.exprs_file, num_scatter_ch)
+    (pkl_ch, scatter_range_ch) = run_panda(params.exprs_file, motif_file_ch, ppi_file_ch, num_scatter_ch)
     ranges_ch = scatter_range_ch.splitCsv(header: true).map{
         row -> tuple(row.start, row.end)
     }

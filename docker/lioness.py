@@ -74,7 +74,7 @@ def main():
         description="Runs LIONESS on input PANDA pickle and given slice range."
     )
     parser.add_argument(
-        "--start", required=True, type=int
+        "--start", required=True, type=int,
         help="Start index for slice"
     )
     parser.add_argument(
